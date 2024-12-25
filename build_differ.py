@@ -75,13 +75,15 @@ async def main():
 
     dist_dir = "./src/python_redlines/dist/"
 
+    await run_command(["dotnet", "restore", "./csproj"])
+
     run_commands = [
-        ["dotnet", "publish", "./csproj", "-c", "Release", "-r", "linux-x64", "--self-contained"],
-        ["dotnet", "publish", "./csproj", "-c", "Release", "-r", "linux-arm64", "--self-contained"],
-        ["dotnet", "publish", "./csproj", "-c", "Release", "-r", "win-x64", "--self-contained"],
-        ["dotnet", "publish", "./csproj", "-c", "Release", "-r", "win-arm64", "--self-contained"],
-        ["dotnet", "publish", "./csproj", "-c", "Release", "-r", "osx-x64", "--self-contained"],
-        ["dotnet", "publish", "./csproj", "-c", "Release", "-r", "osx-arm64", "--self-contained"],
+        ["dotnet", "publish", "./csproj", "-c", "Release", "-r", "linux-x64", "--self-contained", "--no-restore"],
+        ["dotnet", "publish", "./csproj", "-c", "Release", "-r", "linux-arm64", "--self-contained", "--no-restore"],
+        ["dotnet", "publish", "./csproj", "-c", "Release", "-r", "win-x64", "--self-contained", "--no-restore"],
+        ["dotnet", "publish", "./csproj", "-c", "Release", "-r", "win-arm64", "--self-contained", "--no-restore"],
+        ["dotnet", "publish", "./csproj", "-c", "Release", "-r", "osx-x64", "--self-contained", "--no-restore"],
+        ["dotnet", "publish", "./csproj", "-c", "Release", "-r", "osx-arm64", "--self-contained", "--no-restore"],
     ]
 
     await asyncio.gather(*[run_command(command) for command in run_commands])
