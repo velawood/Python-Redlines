@@ -15,15 +15,17 @@ def get_version():
     return about["__version__"]
 
 
-def run_command(command):
+async def run_command(command):
     """
     Runs a shell command and prints its output.
     """
-    process = subprocess.Popen(
-        command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
+    process = await asyncio.create_subprocess_exec(
+        *command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
     )
-    for line in process.stdout:
+    async for line in process.stdout:
         print(line.decode().strip())
+
+    await process.wait()
 
 
 def _compress_tar(source_dir, target_file):
@@ -49,9 +51,9 @@ async def compress_files(source_dir, target_file):
     """
     loop = asyncio.get_event_loop()
     if target_file.endswith(".tar.gz"):
-        loop.run_in_executor(None, _compress_tar, source_dir, target_file)
+        await loop.run_in_executor(None, _compress_tar, source_dir, target_file)
     elif target_file.endswith(".zip"):
-        loop.run_in_executor(None, _compress_zip, source_dir, target_file)
+        await loop.run_in_executor(None, _compress_zip, source_dir, target_file)
 
 
 def cleanup_old_builds(dist_dir, current_version):
@@ -73,29 +75,16 @@ async def main():
 
     dist_dir = "./src/python_redlines/dist/"
 
-    # Build for Linux x64
-    print("Building for Linux x64...")
-    run_command("dotnet publish ./csproj -c Release -r linux-x64 --self-contained")
+    run_commands = [
+        ["dotnet", "publish", "./csproj", "-c", "Release", "-r", "linux-x64", "--self-contained"],
+        ["dotnet", "publish", "./csproj", "-c", "Release", "-r", "linux-arm64", "--self-contained"],
+        ["dotnet", "publish", "./csproj", "-c", "Release", "-r", "win-x64", "--self-contained"],
+        ["dotnet", "publish", "./csproj", "-c", "Release", "-r", "win-arm64", "--self-contained"],
+        ["dotnet", "publish", "./csproj", "-c", "Release", "-r", "osx-x64", "--self-contained"],
+        ["dotnet", "publish", "./csproj", "-c", "Release", "-r", "osx-arm64", "--self-contained"],
+    ]
 
-    # Build for Linux ARM64
-    print("Building for Linux ARM64...")
-    run_command("dotnet publish ./csproj -c Release -r linux-arm64 --self-contained")
-
-    # Build for Windows x64
-    print("Building for Windows x64...")
-    run_command("dotnet publish ./csproj -c Release -r win-x64 --self-contained")
-
-    # Build for Windows ARM64
-    print("Building for Windows ARM64...")
-    run_command("dotnet publish ./csproj -c Release -r win-arm64 --self-contained")
-
-    # Build for macOS x64
-    print("Building for macOS x64...")
-    run_command("dotnet publish ./csproj -c Release -r osx-x64 --self-contained")
-
-    # Build for macOS ARM64
-    print("Building for macOS ARM64...")
-    run_command("dotnet publish ./csproj -c Release -r osx-arm64 --self-contained")
+    await asyncio.gather(*[run_command(command) for command in run_commands])
 
     compression_inputs = [
         (
