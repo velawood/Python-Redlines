@@ -94,22 +94,6 @@ async def main():
             f"{dist_dir}/linux-x64-{version}.tar.gz",
         ),
         (
-            "./csproj/bin/Release/net8.0/linux-arm64",
-            f"{dist_dir}/linux-arm64-{version}.tar.gz",
-        ),
-        (
-            "./csproj/bin/Release/net8.0/win-x64",
-            f"{dist_dir}/win-x64-{version}.zip",
-        ),
-        (
-            "./csproj/bin/Release/net8.0/win-arm64",
-            f"{dist_dir}/win-arm64-{version}.zip",
-        ),
-        (
-            "./csproj/bin/Release/net8.0/osx-x64",
-            f"{dist_dir}/osx-x64-{version}.tar.gz",
-        ),
-        (
             "./csproj/bin/Release/net8.0/osx-arm64",
             f"{dist_dir}/osx-arm64-{version}.tar.gz",
         ),
